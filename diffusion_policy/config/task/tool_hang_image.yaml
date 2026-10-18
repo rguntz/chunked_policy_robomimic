@@ -1,5 +1,9 @@
 name: tool_hang_image
 
+# paper settings (diffusion-policy.cs.columbia.edu/data/experiments/image/<task>_ph/diffusion_policy_cnn/config.yaml)
+crop_shape: [216, 216]
+num_epochs: 3000
+
 shape_meta: &shape_meta
   # acceptable types: rgb, low_dim
   obs:
