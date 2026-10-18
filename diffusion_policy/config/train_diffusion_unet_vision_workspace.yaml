@@ -1,9 +1,9 @@
 defaults:
   - _self_
-  - task: lift_image_abs
+  - task: lift_vision_abs
 
-name: train_diffusion_unet_hybrid
-_target_: diffusion_policy.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
+name: train_diffusion_unet_vision
+_target_: diffusion_policy.workspace.train_diffusion_unet_vision_workspace.TrainDiffusionUnetVisionWorkspace
 
 task_name: ${task.name}
 shape_meta: ${task.shape_meta}
@@ -19,7 +19,7 @@ keypoint_visible_rate: 1.0
 obs_as_global_cond: True
 
 policy:
-  _target_: diffusion_policy.policy.diffusion_unet_hybrid_image_policy.DiffusionUnetHybridImagePolicy
+  _target_: diffusion_policy.policy.diffusion_unet_vision_policy.DiffusionUnetVisionPolicy
 
   shape_meta: ${shape_meta}
   

@@ -20,9 +20,9 @@ import tqdm
 import numpy as np
 import shutil
 from diffusion_policy.workspace.base_workspace import BaseWorkspace
-from diffusion_policy.policy.diffusion_unet_hybrid_image_policy import DiffusionUnetHybridImagePolicy
-from diffusion_policy.dataset.base_dataset import BaseImageDataset
-from diffusion_policy.env_runner.base_image_runner import BaseImageRunner
+from diffusion_policy.policy.diffusion_unet_vision_policy import DiffusionUnetVisionPolicy
+from diffusion_policy.dataset.base_dataset import BaseVisionDataset
+from diffusion_policy.env_runner.base_vision_runner import BaseVisionRunner
 from diffusion_policy.common.checkpoint_util import TopKCheckpointManager
 from diffusion_policy.common.json_logger import JsonLogger
 from diffusion_policy.common.pytorch_util import dict_apply, optimizer_to
@@ -31,7 +31,7 @@ from diffusion_policy.model.common.lr_scheduler import get_scheduler
 
 OmegaConf.register_new_resolver("eval", eval, replace=True)
 
-class TrainDiffusionUnetHybridWorkspace(BaseWorkspace):
+class TrainDiffusionUnetVisionWorkspace(BaseWorkspace):
     include_keys = ['global_step', 'epoch']
 
     def __init__(self, cfg: OmegaConf, output_dir=None):
@@ -44,9 +44,9 @@ class TrainDiffusionUnetHybridWorkspace(BaseWorkspace):
         random.seed(seed)
 
         # configure model
-        self.model: DiffusionUnetHybridImagePolicy = hydra.utils.instantiate(cfg.policy)
+        self.model: DiffusionUnetVisionPolicy = hydra.utils.instantiate(cfg.policy)
 
-        self.ema_model: DiffusionUnetHybridImagePolicy = None
+        self.ema_model: DiffusionUnetVisionPolicy = None
         if cfg.training.use_ema:
             self.ema_model = copy.deepcopy(self.model)
 
@@ -69,9 +69,9 @@ class TrainDiffusionUnetHybridWorkspace(BaseWorkspace):
                 self.load_checkpoint(path=lastest_ckpt_path)
 
         # configure dataset
-        dataset: BaseImageDataset
+        dataset: BaseVisionDataset
         dataset = hydra.utils.instantiate(cfg.task.dataset)
-        assert isinstance(dataset, BaseImageDataset)
+        assert isinstance(dataset, BaseVisionDataset)
         train_dataloader = DataLoader(dataset, **cfg.dataloader)
         normalizer = dataset.get_normalizer()
 
@@ -104,11 +104,11 @@ class TrainDiffusionUnetHybridWorkspace(BaseWorkspace):
                 model=self.ema_model)
 
         # configure env
-        env_runner: BaseImageRunner
+        env_runner: BaseVisionRunner
         env_runner = hydra.utils.instantiate(
             cfg.task.env_runner,
             output_dir=self.output_dir)
-        assert isinstance(env_runner, BaseImageRunner)
+        assert isinstance(env_runner, BaseVisionRunner)
 
         # configure logging
         wandb_run = wandb.init(
@@ -289,7 +289,7 @@ class TrainDiffusionUnetHybridWorkspace(BaseWorkspace):
     config_path=str(pathlib.Path(__file__).parent.parent.joinpath("config")), 
     config_name=pathlib.Path(__file__).stem)
 def main(cfg):
-    workspace = TrainDiffusionUnetHybridWorkspace(cfg)
+    workspace = TrainDiffusionUnetVisionWorkspace(cfg)
     workspace.run()
 
 if __name__ == "__main__":

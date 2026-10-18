@@ -6,7 +6,7 @@ from gym import spaces
 from omegaconf import OmegaConf
 from robomimic.envs.env_robosuite import EnvRobosuite
 
-class RobomimicImageWrapper(gym.Env):
+class RobomimicVisionWrapper(gym.Env):
     def __init__(self, 
         env: EnvRobosuite,
         shape_meta: dict,
@@ -121,7 +121,7 @@ class RobomimicImageWrapper(gym.Env):
 def test():
     import os
     from omegaconf import OmegaConf
-    cfg_path = os.path.expanduser('~/dev/diffusion_policy/diffusion_policy/config/task/lift_image.yaml')
+    cfg_path = os.path.expanduser('~/dev/diffusion_policy/diffusion_policy/config/task/lift_vision.yaml')
     cfg = OmegaConf.load(cfg_path)
     shape_meta = cfg['shape_meta']
 
@@ -141,7 +141,7 @@ def test():
         use_image_obs=True, 
     )
 
-    wrapper = RobomimicImageWrapper(
+    wrapper = RobomimicVisionWrapper(
         env=env,
         shape_meta=shape_meta
     )

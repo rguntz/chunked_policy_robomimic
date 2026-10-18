@@ -15,7 +15,7 @@ import concurrent.futures
 import multiprocessing
 from omegaconf import OmegaConf
 from diffusion_policy.common.pytorch_util import dict_apply
-from diffusion_policy.dataset.base_dataset import BaseImageDataset, LinearNormalizer
+from diffusion_policy.dataset.base_dataset import BaseVisionDataset, LinearNormalizer
 from diffusion_policy.model.common.normalizer import LinearNormalizer, SingleFieldLinearNormalizer
 from diffusion_policy.model.common.rotation_transformer import RotationTransformer
 from diffusion_policy.codecs.imagecodecs_numcodecs import register_codecs, Jpeg2k
@@ -31,7 +31,7 @@ from diffusion_policy.common.normalize_util import (
 )
 register_codecs()
 
-class RobomimicReplayImageDataset(BaseImageDataset):
+class RobomimicReplayVisionDataset(BaseVisionDataset):
     def __init__(self,
             shape_meta: dict,
             dataset_path: str,

@@ -15,10 +15,10 @@ from diffusion_policy.gym_util.multistep_wrapper import MultiStepWrapper
 from diffusion_policy.gym_util.video_recording_wrapper import VideoRecordingWrapper, VideoRecorder
 from diffusion_policy.model.common.rotation_transformer import RotationTransformer
 
-from diffusion_policy.policy.base_image_policy import BaseImagePolicy
+from diffusion_policy.policy.base_vision_policy import BaseVisionPolicy
 from diffusion_policy.common.pytorch_util import dict_apply
-from diffusion_policy.env_runner.base_image_runner import BaseImageRunner
-from diffusion_policy.env.robomimic.robomimic_image_wrapper import RobomimicImageWrapper
+from diffusion_policy.env_runner.base_vision_runner import BaseVisionRunner
+from diffusion_policy.env.robomimic.robomimic_vision_wrapper import RobomimicVisionWrapper
 import robomimic.utils.file_utils as FileUtils
 import robomimic.utils.env_utils as EnvUtils
 import robomimic.utils.obs_utils as ObsUtils
@@ -39,7 +39,7 @@ def create_env(env_meta, shape_meta, enable_render=True):
     return env
 
 
-class RobomimicImageRunner(BaseImageRunner):
+class RobomimicVisionRunner(BaseVisionRunner):
     """
     Robomimic envs already enforces number of steps.
     """
@@ -97,7 +97,7 @@ class RobomimicImageRunner(BaseImageRunner):
             robomimic_env.env.hard_reset = False
             return MultiStepWrapper(
                 VideoRecordingWrapper(
-                    RobomimicImageWrapper(
+                    RobomimicVisionWrapper(
                         env=robomimic_env,
                         shape_meta=shape_meta,
                         init_state=None,
@@ -131,7 +131,7 @@ class RobomimicImageRunner(BaseImageRunner):
                 )
             return MultiStepWrapper(
                 VideoRecordingWrapper(
-                    RobomimicImageWrapper(
+                    RobomimicVisionWrapper(
                         env=robomimic_env,
                         shape_meta=shape_meta,
                         init_state=None,
@@ -180,7 +180,7 @@ class RobomimicImageRunner(BaseImageRunner):
                         env.env.file_path = filename
 
                     # switch to init_state reset
-                    assert isinstance(env.env.env, RobomimicImageWrapper)
+                    assert isinstance(env.env.env, RobomimicVisionWrapper)
                     env.env.env.init_state = init_state
 
                 env_seeds.append(train_idx)
@@ -207,7 +207,7 @@ class RobomimicImageRunner(BaseImageRunner):
                     env.env.file_path = filename
 
                 # switch to seed reset
-                assert isinstance(env.env.env, RobomimicImageWrapper)
+                assert isinstance(env.env.env, RobomimicVisionWrapper)
                 env.env.env.init_state = None
                 env.seed(seed)
 
@@ -235,7 +235,7 @@ class RobomimicImageRunner(BaseImageRunner):
         self.abs_action = abs_action
         self.tqdm_interval_sec = tqdm_interval_sec
 
-    def run(self, policy: BaseImagePolicy):
+    def run(self, policy: BaseVisionPolicy):
         device = policy.device
         dtype = policy.dtype
         env = self.env

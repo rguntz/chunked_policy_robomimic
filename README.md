@@ -27,7 +27,7 @@ The environment pins **robosuite 1.2.0 / robomimic 0.2.0**. Datasets recorded wi
 | Observation | Workspace (trainer) | Policy | Dataset | Env runner |
 |---|---|---|---|---|
 | State | `train_diffusion_unet_lowdim_workspace` | `DiffusionUnetLowdimPolicy` | `RobomimicReplayLowdimDataset` | `RobomimicLowdimRunner` |
-| Image + proprio | `train_diffusion_unet_hybrid_workspace` | `DiffusionUnetHybridImagePolicy` | `RobomimicReplayImageDataset` | `RobomimicImageRunner` |
+| Vision (images + proprio) | `train_diffusion_unet_vision_workspace` | `DiffusionUnetVisionPolicy` | `RobomimicReplayVisionDataset` | `RobomimicVisionRunner` |
 
 The image policy encodes each camera with robomimic's ResNet18 + spatial softmax encoder (trained from scratch, BatchNorm replaced by GroupNorm), concatenates the features with the low-dim robot state, and conditions the 1D UNet on them. These two workspaces are the ones used for the paper's Diffusion Policy (CNN) results.
 
@@ -58,7 +58,7 @@ $ unzip robomimic_lowdim.zip && unzip robomimic_image.zip && cd ..
 
 ## Training
 
-Task configs come in four flavours per task: `<task>_lowdim`, `<task>_lowdim_abs`, `<task>_image`, `<task>_image_abs`. The `_abs` variants (absolute end-effector actions, rotation as 6D) are the ones used for the paper results.
+Task configs come in four flavours per task: `<task>_lowdim`, `<task>_lowdim_abs`, `<task>_vision`, `<task>_vision_abs`. The `_abs` variants (absolute end-effector actions, rotation as 6D) are the ones used for the paper results.
 
 ```console
 # state
@@ -66,7 +66,7 @@ $ python train.py --config-name=train_diffusion_unet_lowdim_workspace task=squar
     training.seed=42 training.device=cuda:0
 
 # image
-$ python train.py --config-name=train_diffusion_unet_hybrid_workspace task=square_image_abs \
+$ python train.py --config-name=train_diffusion_unet_vision_workspace task=square_vision_abs \
     training.seed=42 training.device=cuda:0
 ```
 
@@ -75,7 +75,7 @@ Logging goes to [wandb](https://wandb.ai) (`wandb login` first, or add `logging.
 Quick end-to-end smoke test (a few steps of training, validation, a short rollout and checkpointing):
 
 ```console
-$ python train.py --config-name=train_diffusion_unet_hybrid_workspace task=square_image_abs \
+$ python train.py --config-name=train_diffusion_unet_vision_workspace task=square_vision_abs \
     training.debug=True logging.mode=disabled \
     task.env_runner.n_train=1 task.env_runner.n_test=2 task.env_runner.n_envs=null task.env_runner.max_steps=20
 ```

@@ -27,10 +27,10 @@ class BaseLowdimDataset(torch.utils.data.Dataset):
         raise NotImplementedError()
 
 
-class BaseImageDataset(torch.utils.data.Dataset):
+class BaseVisionDataset(torch.utils.data.Dataset):
     def get_validation_dataset(self) -> 'BaseLowdimDataset':
         # return an empty dataset by default
-        return BaseImageDataset()
+        return BaseVisionDataset()
 
     def get_normalizer(self, **kwargs) -> LinearNormalizer:
         raise NotImplementedError()
