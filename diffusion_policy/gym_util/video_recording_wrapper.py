@@ -1,6 +1,6 @@
 import gym
 import numpy as np
-from diffusion_policy.real_world.video_recorder import VideoRecorder
+from diffusion_policy.common.video_recorder import VideoRecorder
 
 class VideoRecordingWrapper(gym.Wrapper):
     def __init__(self, 
