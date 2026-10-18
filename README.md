@@ -29,16 +29,19 @@ The environment pins **robosuite 1.2.0 / robomimic 0.2.0**. Datasets recorded wi
 | State | `train_diffusion_unet_lowdim_workspace` | `DiffusionUnetLowdimPolicy` | `RobomimicReplayLowdimDataset` | `RobomimicLowdimRunner` |
 | Vision (images + proprio) | `train_diffusion_unet_vision_workspace` | `DiffusionUnetVisionPolicy` | `RobomimicReplayVisionDataset` | `RobomimicVisionRunner` |
 
-The image policy encodes each camera with robomimic's ResNet18 + spatial softmax encoder (trained from scratch, BatchNorm replaced by GroupNorm), concatenates the features with the low-dim robot state, and conditions the 1D UNet on them. These two workspaces are the ones used for the paper's Diffusion Policy (CNN) results.
+The vision policy encodes each camera separately, concatenates the features with the low-dim robot state, and conditions the 1D UNet on them. Two vision encoders are available (`policy.vision_encoder`):
+- `resnet` (default): robomimic's ResNet18 + spatial softmax (trained from scratch, BatchNorm replaced by GroupNorm). This is the setup of the paper's Diffusion Policy (CNN) results.
+- `vit`: `MinVit` from [IBRL](https://github.com/hengyuan-hu/ibrl), with the patch tokens flattened and projected to 64-D per camera.
 
 ```
 train.py / eval.py                  entry points
 diffusion_policy/
   config/                           hydra configs: 2 workspaces + 20 tasks
-    task/<task>_{lowdim,image}[_abs].yaml
+    task/<task>_{lowdim,vision}[_abs].yaml
   workspace/                        training loops
   policy/                           diffusion policies
-  model/                            UNet, EMA, normalizer, crop randomizer
+  model/                            UNet, EMA, normalizer
+  model/vision/                     ViT (min_vit.py, vit_obs_encoder.py), crop randomizer
   dataset/                          robomimic hdf5 -> replay buffer -> sequence sampler
   env/robomimic/, env_runner/,
   gym_util/                         rollout / evaluation in robosuite
@@ -65,10 +68,16 @@ Task configs come in four flavours per task: `<task>_lowdim`, `<task>_lowdim_abs
 $ python train.py --config-name=train_diffusion_unet_lowdim_workspace task=square_lowdim_abs \
     training.seed=42 training.device=cuda:0
 
-# image
+# vision, ResNet encoder (paper)
 $ python train.py --config-name=train_diffusion_unet_vision_workspace task=square_vision_abs \
     training.seed=42 training.device=cuda:0
+
+# vision, ViT encoder
+$ python train.py --config-name=train_diffusion_unet_vision_workspace task=square_vision_abs \
+    policy.vision_encoder=vit training.seed=42 training.device=cuda:0
 ```
+
+Each checkpoint of a vision run is several GB (UNet + EMA copy + optimizer state), so keep an eye on disk space; `checkpoint.topk.k` sets how many are kept.
 
 Logging goes to [wandb](https://wandb.ai) (`wandb login` first, or add `logging.mode=offline`). Outputs (config, logs, checkpoints, rollout videos) are written to `data/outputs/<date>/<time>_<name>_<task>/`.
 

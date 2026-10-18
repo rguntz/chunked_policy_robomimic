@@ -47,6 +47,16 @@ policy:
   cond_predict_scale: True
   obs_encoder_group_norm: True
   eval_fixed_crop: True
+  # resnet: robomimic ResNet18 + spatial softmax (paper), vit: MinVit from IBRL
+  vision_encoder: resnet
+  # only used when vision_encoder=vit (defaults of IBRL's VitEncoderConfig)
+  vit:
+    feature_dim: 64
+    embed_style: embed1
+    embed_dim: 128
+    embed_norm: 0
+    num_head: 4
+    depth: 3
 
   # scheduler.step params
   # predict_epsilon: True
