@@ -26,8 +26,8 @@ dependencies = [
     "threadpoolctl==3.1.0",
     "tqdm==4.64.1",
     "click==8.0.4",
-    "wandb==0.13.3",
-    "protobuf==3.19.6",
+    "wandb==0.26.1",  # 0.13.3 (conda env) can no longer talk to the wandb server
+    "protobuf==6.33.6",
     "matplotlib==3.6.1",
     "av==12.3.0",  # 10.0.0 (conda env) has no wheel here; newer wheels bundle ffmpeg
     "imageio==2.22.0",
