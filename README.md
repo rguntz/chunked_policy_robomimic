@@ -2,7 +2,11 @@
 
 A stripped-down version of [Diffusion Policy](https://github.com/real-stanford/diffusion_policy) (Chi et al., RSS 2023), restricted to the CNN-based (UNet) Diffusion Policy on the five [robomimic](https://robomimic.github.io/) tasks: **lift, can, square, tool_hang, transport**, from either state or image observations.
 
-Everything else from upstream (PushT, Kitchen, BlockPush, BET, IBC, the diffusion transformer, real-robot code, Ray multi-run scripts) has been removed. Apart from a few config fixes, the remaining code is unmodified upstream code.
+Everything else from upstream (PushT, Kitchen, BlockPush, BET, IBC, the diffusion transformer, real-robot code, Ray multi-run scripts) has been removed. Changes to the remaining upstream code:
+- the image pipeline is named `vision` (upstream: `hybrid` / `image`), next to `lowdim` for state;
+- a ViT vision encoder is available as an alternative to the ResNet (`policy.vision_encoder=vit`);
+- the image task configs set the paper's per-task crop size and epoch count;
+- the environment is managed with uv instead of conda.
 
 ## Installation
 
@@ -24,6 +28,7 @@ $ echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.mujoco/mujoco210/bin' >> 
 Create the environment with [uv](https://docs.astral.sh/uv/) (installs Python 3.9 and all pinned dependencies into `.venv/`):
 
 ```console
+$ curl -LsSf https://astral.sh/uv/install.sh | sh    # if uv is not installed yet
 $ uv sync
 $ source .venv/bin/activate    # or prefix commands with `uv run`
 ```
@@ -45,16 +50,19 @@ The vision policy encodes each camera separately, concatenates the features with
 
 ```
 train.py / eval.py                  entry points
+pyproject.toml / uv.lock            dependencies (uv)
+third_party/                        patched gym 0.21.0 wheel
 diffusion_policy/
   config/                           hydra configs: 2 workspaces + 20 tasks
     task/<task>_{lowdim,vision}[_abs].yaml
   workspace/                        training loops
   policy/                           diffusion policies
-  model/                            UNet, EMA, normalizer
+  model/                            UNet, EMA, normalizer, rotation conversions
   model/vision/                     ViT (min_vit.py, vit_obs_encoder.py), crop randomizer
   dataset/                          robomimic hdf5 -> replay buffer -> sequence sampler
   env/robomimic/, env_runner/,
   gym_util/                         rollout / evaluation in robosuite
+  common/, codecs/                  replay buffer, sampler, checkpointing, video recorder, image codecs
   scripts/robomimic_dataset_conversion.py   delta -> absolute action conversion
 ```
 
