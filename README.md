@@ -13,12 +13,22 @@ $ git clone https://github.com/rguntz/diffusion_policy_robomimic.git
 $ cd diffusion_policy_robomimic
 ```
 
-Create the conda environment:
+robosuite 1.2 simulates with `mujoco-py`, which needs the MuJoCo 2.1 binaries and a few system libraries (one-time setup):
 
 ```console
-$ mamba env create -f conda_environment.yaml
-$ conda activate robodiff
+$ sudo apt install libosmesa6-dev libgl1-mesa-glx libglfw3 libglew-dev patchelf gcc
+$ mkdir -p ~/.mujoco && wget -qO- https://github.com/deepmind/mujoco/releases/download/2.1.0/mujoco210-linux-x86_64.tar.gz | tar xz -C ~/.mujoco
+$ echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.mujoco/mujoco210/bin' >> ~/.bashrc && source ~/.bashrc
 ```
+
+Create the environment with [uv](https://docs.astral.sh/uv/) (installs Python 3.9 and all pinned dependencies into `.venv/`):
+
+```console
+$ uv sync
+$ source .venv/bin/activate    # or prefix commands with `uv run`
+```
+
+The first `import mujoco_py` compiles its extension, which takes about a minute. `third_party/` holds a gym 0.21.0 wheel rebuilt with a one-character metadata fix that uv needs; it is installed automatically.
 
 The environment pins **robosuite 1.2.0 / robomimic 0.2.0**. Datasets recorded with robosuite 1.5 (robomimic `*_v15.hdf5`) are **not** compatible: creating the eval environment fails with `unexpected keyword argument 'lite_physics'`. Use the datasets below.
 
@@ -99,7 +109,7 @@ $ python eval.py -c data/outputs/.../checkpoints/latest.ckpt -o data/eval_output
 
 ## License and acknowledgement
 
-Released under the MIT license; see [LICENSE](LICENSE). Original code © 2023 Columbia Artificial Intelligence and Robotics Lab. `diffusion_policy/codecs/imagecodecs_numcodecs.py` is © Christoph Gohlke under the BSD-3-Clause license (see the file header).
+Released under the MIT license; see [LICENSE](LICENSE). Original code © 2023 Columbia Artificial Intelligence and Robotics Lab. `diffusion_policy/codecs/imagecodecs_numcodecs.py` is © Christoph Gohlke under the BSD-3-Clause license (see the file header). `diffusion_policy/model/common/rotation_conversions.py` is vendored from [PyTorch3D](https://github.com/facebookresearch/pytorch3d) (© Meta Platforms, BSD license, see `LICENSE_pytorch3d` next to it). `diffusion_policy/model/vision/min_vit.py` is taken from [IBRL](https://github.com/hengyuan-hu/ibrl) (see the file header).
 
 From the upstream acknowledgements: the `ConditionalUnet1D` implementation is adapted from [Planning with Diffusion](https://github.com/jannerm/diffuser), and the [robomimic](https://github.com/ARISE-Initiative/robomimic) tasks and `ObservationEncoder` are used extensively.
 

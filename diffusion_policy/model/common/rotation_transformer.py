@@ -1,5 +1,5 @@
 from typing import Union
-import pytorch3d.transforms as pt
+import diffusion_policy.model.common.rotation_conversions as pt
 import torch
 import numpy as np
 import functools

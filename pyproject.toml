@@ -1,0 +1,55 @@
+[project]
+name = "diffusion-policy-robomimic"
+version = "0.1.0"
+description = "Minimal Diffusion Policy (UNet) on the robomimic tasks"
+requires-python = "==3.9.*"
+# versions pinned to the conda env this code was tested with
+dependencies = [
+    "torch==2.1.2",
+    "torchvision==0.16.2",
+    "numpy==1.23.3",
+    "scipy==1.9.1",
+    "numba==0.53.1",
+    "setuptools==80.9.0",  # numba 0.53 imports pkg_resources
+    "einops==0.4.1",
+    "diffusers==0.11.1",
+    "huggingface-hub==0.11.1",
+    "hydra-core==1.2.0",
+    "omegaconf==2.2.3",
+    "zarr==2.12.0",
+    "numcodecs==0.10.2",
+    "imagecodecs==2022.9.26",
+    "h5py==3.7.0",
+    "pandas==2.2.3",
+    "dill==0.3.5.1",
+    "filelock==3.19.1",
+    "threadpoolctl==3.1.0",
+    "tqdm==4.64.1",
+    "click==8.0.4",
+    "wandb==0.13.3",
+    "protobuf==3.19.6",
+    "matplotlib==3.6.1",
+    "av==12.3.0",  # 10.0.0 (conda env) has no wheel here; newer wheels bundle ffmpeg
+    "imageio==2.22.0",
+    "imageio-ffmpeg==0.4.7",
+    "gym==0.21.0",  # local wheel, see [tool.uv.sources]
+    # simulation: robosuite 1.2 runs on mujoco-py, which needs MuJoCo 2.1 in ~/.mujoco/mujoco210
+    "free-mujoco-py==2.1.6",
+    "cython==0.29.32",
+    "robosuite @ https://github.com/cheng-chi/robosuite/archive/277ab9588ad7a4f4b55cf75508b44aa67ec171f0.tar.gz",
+    "robomimic==0.2.0",
+]
+
+[tool.uv]
+# the repo is run from its root (python train.py), not installed as a package
+package = false
+
+[tool.uv.extra-build-dependencies]
+# egl_probe (robomimic dependency) calls cmake in its setup.py
+egl-probe = ["cmake==3.24.3"]  # CMake 4 rejects its cmake_minimum_required; same version as the conda env
+
+
+[tool.uv.sources]
+# gym 0.21.0 publishes invalid metadata ("opencv-python>=3." in its extras) that uv rejects.
+# third_party/ holds gym 0.21.0 built from the PyPI sdist with only that string fixed to ">=3.0".
+gym = { path = "third_party/gym-0.21.0-py3-none-any.whl" }
