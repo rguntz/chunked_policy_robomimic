@@ -2,7 +2,25 @@
 
 A stripped-down version of [Diffusion Policy](https://github.com/real-stanford/diffusion_policy) (Chi et al., RSS 2023), restricted to the CNN-based (UNet) Diffusion Policy on the five [robomimic](https://robomimic.github.io/) tasks: **lift, can, square, tool_hang, transport**, from either state or image observations.
 
-Everything else from upstream (PushT, Kitchen, BlockPush, BET, IBC, the diffusion transformer, real-robot code, Ray multi-run scripts) has been removed. The remaining code is unmodified upstream code; the only changes are in the configs (see [Differences from upstream](#differences-from-upstream)).
+Everything else from upstream (PushT, Kitchen, BlockPush, BET, IBC, the diffusion transformer, real-robot code, Ray multi-run scripts) has been removed. Apart from a few config fixes, the remaining code is unmodified upstream code.
+
+## Installation
+
+Clone the repository:
+
+```console
+$ git clone https://github.com/rguntz/diffusion_policy_robomimic.git
+$ cd diffusion_policy_robomimic
+```
+
+Create the conda environment:
+
+```console
+$ mamba env create -f conda_environment.yaml
+$ conda activate robodiff
+```
+
+The environment pins **robosuite 1.2.0 / robomimic 0.2.0**. Datasets recorded with robosuite 1.5 (robomimic `*_v15.hdf5`) are **not** compatible: creating the eval environment fails with `unexpected keyword argument 'lite_physics'`. Use the datasets below.
 
 ## Layout
 
@@ -26,15 +44,6 @@ diffusion_policy/
   gym_util/                         rollout / evaluation in robosuite
   scripts/robomimic_dataset_conversion.py   delta -> absolute action conversion
 ```
-
-## Installation
-
-```console
-$ mamba env create -f conda_environment.yaml
-$ conda activate robodiff
-```
-
-The environment pins **robosuite 1.2.0 / robomimic 0.2.0**. Datasets recorded with robosuite 1.5 (robomimic `*_v15.hdf5`) are **not** compatible: creating the eval environment fails with `unexpected keyword argument 'lite_physics'`. Use the datasets below.
 
 ## Data
 
@@ -78,12 +87,6 @@ Evaluation runs 50 test rollouts on 28 parallel environments by default (about 1
 ```console
 $ python eval.py -c data/outputs/.../checkpoints/latest.ckpt -o data/eval_output -d cuda:0
 ```
-
-## Differences from upstream
-
-- Removed everything not needed for the robomimic tasks with the UNet Diffusion Policy.
-- Image task configs now set the paper's `crop_shape` and `num_epochs` per task, taken from the published [experiment configs](https://diffusion-policy.cs.columbia.edu/data/experiments/): crop 216×216 for tool_hang (240×240 images) and 76×76 otherwise; 8000 epochs for lift/can/square and 3000 for transport/tool_hang. Upstream hardcoded a 76×76 crop and 3050 epochs for all tasks.
-- With these changes, the resolved configs for the `ph` `_abs` tasks match the published paper configs. The one exception is `task.dataset.use_legacy_normalizer` (image tasks only), which the paper configs predate, so its paper value is unknown (local default: `False`).
 
 ## License and acknowledgement
 
