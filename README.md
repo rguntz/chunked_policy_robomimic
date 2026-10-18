@@ -5,6 +5,7 @@ A stripped-down version of [Diffusion Policy](https://github.com/real-stanford/d
 Everything else from upstream (PushT, Kitchen, BlockPush, BET, IBC, the diffusion transformer, real-robot code, Ray multi-run scripts) has been removed. Changes to the remaining upstream code:
 - the image pipeline is named `vision` (upstream: `hybrid` / `image`), next to `lowdim` for state;
 - a ViT vision encoder is available as an alternative to the ResNet (`policy.vision_encoder=vit`);
+- a behavior cloning policy (MLP regressing the action chunk, MSE loss) is available as an alternative to the diffusion UNet;
 - the image task configs set the paper's per-task crop size and epoch count;
 - the environment is managed with uv instead of conda.
 
@@ -39,12 +40,18 @@ The environment pins **robosuite 1.2.0 / robomimic 0.2.0**. Datasets recorded wi
 
 ## Layout
 
-| Observation | Workspace (trainer) | Policy | Dataset | Env runner |
+| Observation | Dataset | Env runner | Diffusion (UNet) policy | BC (MLP) policy |
 |---|---|---|---|---|
-| State | `train_diffusion_unet_lowdim_workspace` | `DiffusionUnetLowdimPolicy` | `RobomimicReplayLowdimDataset` | `RobomimicLowdimRunner` |
-| Vision (images + proprio) | `train_diffusion_unet_vision_workspace` | `DiffusionUnetVisionPolicy` | `RobomimicReplayVisionDataset` | `RobomimicVisionRunner` |
+| State | `RobomimicReplayLowdimDataset` | `RobomimicLowdimRunner` | `DiffusionUnetLowdimPolicy` | `BCMlpLowdimPolicy` |
+| Vision (images + proprio) | `RobomimicReplayVisionDataset` | `RobomimicVisionRunner` | `DiffusionUnetVisionPolicy` | `BCMlpVisionPolicy` |
 
-The vision policy encodes each camera separately, concatenates the features with the low-dim robot state, and conditions the 1D UNet on them. Two vision encoders are available (`policy.vision_encoder`):
+Each policy has its own config, `train_{diffusion_unet,bc_mlp}_{lowdim,vision}_workspace.yaml`. Both policies of an observation type share the same trainer, dataset, normalizer, optimizer, EMA and env runner; only the policy block of the config differs.
+
+Both policies predict an action chunk of `horizon` = 16 steps from the last `n_obs_steps` = 2 observations, and the runner executes `n_action_steps` = 8 of them before predicting again:
+- diffusion: the 1D UNet denoises the chunk in 100 steps, conditioned on the observation features;
+- BC: an MLP (`hidden_dims: [1024, 1024]`) maps the stacked observation features to the chunk in one forward pass, trained with an MSE loss on normalized actions.
+
+The vision policies encode each camera separately and concatenate the features with the low-dim robot state. Two vision encoders are available (`policy.vision_encoder`), for both policies:
 - `resnet` (default): robomimic's ResNet18 + spatial softmax (trained from scratch, BatchNorm replaced by GroupNorm). This is the setup of the paper's Diffusion Policy (CNN) results.
 - `vit`: `MinVit` from [IBRL](https://github.com/hengyuan-hu/ibrl), with the patch tokens flattened and projected to 64-D per camera.
 
@@ -53,12 +60,12 @@ train.py / eval.py                  entry points
 pyproject.toml / uv.lock            dependencies (uv)
 third_party/                        patched gym 0.21.0 wheel
 diffusion_policy/
-  config/                           hydra configs: 2 workspaces + 20 tasks
+  config/                           hydra configs: 4 (policy x observation) + 20 tasks
     task/<task>_{lowdim,vision}[_abs].yaml
   workspace/                        training loops
-  policy/                           diffusion policies
-  model/                            UNet, EMA, normalizer, rotation conversions
-  model/vision/                     ViT (min_vit.py, vit_obs_encoder.py), crop randomizer
+  policy/                           diffusion and BC policies
+  model/                            UNet, MLP, EMA, normalizer, rotation conversions
+  model/vision/                     obs encoder (obs_encoder.py), ViT (min_vit.py, vit_obs_encoder.py), crop randomizer
   dataset/                          robomimic hdf5 -> replay buffer -> sequence sampler
   env/robomimic/, env_runner/,
   gym_util/                         rollout / evaluation in robosuite
@@ -93,9 +100,15 @@ $ python train.py --config-name=train_diffusion_unet_vision_workspace task=squar
 # vision, ViT encoder
 $ python train.py --config-name=train_diffusion_unet_vision_workspace task=square_vision_abs \
     policy.vision_encoder=vit training.seed=42 training.device=cuda:0
+
+# BC (MLP) instead of diffusion: same commands with the bc_mlp configs
+$ python train.py --config-name=train_bc_mlp_lowdim_workspace task=square_lowdim_abs \
+    training.seed=42 training.device=cuda:0
+$ python train.py --config-name=train_bc_mlp_vision_workspace task=square_vision_abs \
+    policy.vision_encoder=vit training.seed=42 training.device=cuda:0
 ```
 
-Each checkpoint of a vision run is several GB (UNet + EMA copy + optimizer state), so keep an eye on disk space; `checkpoint.topk.k` sets how many are kept.
+Each checkpoint of a diffusion vision run is about 4.4 GB (UNet + EMA copy + optimizer state), so keep an eye on disk space; `checkpoint.topk.k` sets how many are kept. BC checkpoints are much smaller (about 0.5 GB with the ResNet, 60 MB with the ViT, 20 MB for state).
 
 Logging goes to [wandb](https://wandb.ai) (`wandb login` first, or add `logging.mode=offline`). Outputs (config, logs, checkpoints, rollout videos) are written to `data/outputs/<date>/<time>_<name>_<task>/`.
 
