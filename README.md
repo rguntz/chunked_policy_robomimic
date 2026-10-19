@@ -81,7 +81,7 @@ The configs use the robomimic proficient-human (`ph`) datasets as packaged by Di
 ```console
 $ python diffusion_policy/scripts/download_robomimic.py --dry-run         # list the files and sizes
 $ python diffusion_policy/scripts/download_robomimic.py                   # all 5 tasks, lowdim + vision, _abs actions
-$ python diffusion_policy/scripts/download_robomimic.py --tasks lift can square --obs vision
+$ python diffusion_policy/scripts/download_robomimic.py --tasks lift can square --obs vision   # lift, can, square, vision only, _abs actions
 $ python diffusion_policy/scripts/download_robomimic.py --actions abs delta   # also the delta-action files (<task>_lowdim / <task>_vision configs)
 ```
 
