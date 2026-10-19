@@ -126,6 +126,81 @@ wheels = [
 ]
 
 [[package]]
+name = "chunked-policy-robomimic"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "av" },
+    { name = "click" },
+    { name = "cython" },
+    { name = "diffusers" },
+    { name = "dill" },
+    { name = "einops" },
+    { name = "filelock" },
+    { name = "free-mujoco-py" },
+    { name = "gym" },
+    { name = "h5py" },
+    { name = "huggingface-hub" },
+    { name = "hydra-core" },
+    { name = "imagecodecs" },
+    { name = "imageio" },
+    { name = "imageio-ffmpeg" },
+    { name = "matplotlib" },
+    { name = "numba" },
+    { name = "numcodecs" },
+    { name = "numpy" },
+    { name = "omegaconf" },
+    { name = "pandas" },
+    { name = "protobuf" },
+    { name = "robomimic" },
+    { name = "robosuite" },
+    { name = "scipy" },
+    { name = "setuptools" },
+    { name = "threadpoolctl" },
+    { name = "torch" },
+    { name = "torchvision" },
+    { name = "tqdm" },
+    { name = "wandb" },
+    { name = "zarr" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "av", specifier = "==12.3.0" },
+    { name = "click", specifier = "==8.0.4" },
+    { name = "cython", specifier = "==0.29.32" },
+    { name = "diffusers", specifier = "==0.11.1" },
+    { name = "dill", specifier = "==0.3.5.1" },
+    { name = "einops", specifier = "==0.4.1" },
+    { name = "filelock", specifier = "==3.19.1" },
+    { name = "free-mujoco-py", specifier = "==2.1.6" },
+    { name = "gym", path = "third_party/gym-0.21.0-py3-none-any.whl" },
+    { name = "h5py", specifier = "==3.7.0" },
+    { name = "huggingface-hub", specifier = "==0.11.1" },
+    { name = "hydra-core", specifier = "==1.2.0" },
+    { name = "imagecodecs", specifier = "==2022.9.26" },
+    { name = "imageio", specifier = "==2.22.0" },
+    { name = "imageio-ffmpeg", specifier = "==0.4.7" },
+    { name = "matplotlib", specifier = "==3.6.1" },
+    { name = "numba", specifier = "==0.53.1" },
+    { name = "numcodecs", specifier = "==0.10.2" },
+    { name = "numpy", specifier = "==1.23.3" },
+    { name = "omegaconf", specifier = "==2.2.3" },
+    { name = "pandas", specifier = "==2.2.3" },
+    { name = "protobuf", specifier = "==6.33.6" },
+    { name = "robomimic", specifier = "==0.2.0" },
+    { name = "robosuite", url = "https://github.com/cheng-chi/robosuite/archive/277ab9588ad7a4f4b55cf75508b44aa67ec171f0.tar.gz" },
+    { name = "scipy", specifier = "==1.9.1" },
+    { name = "setuptools", specifier = "==80.9.0" },
+    { name = "threadpoolctl", specifier = "==3.1.0" },
+    { name = "torch", specifier = "==2.1.2" },
+    { name = "torchvision", specifier = "==0.16.2" },
+    { name = "tqdm", specifier = "==4.64.1" },
+    { name = "wandb", specifier = "==0.26.1" },
+    { name = "zarr", specifier = "==2.12.0" },
+]
+
+[[package]]
 name = "click"
 version = "8.0.4"
 source = { registry = "https://pypi.org/simple" }
@@ -219,81 +294,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/22/14/fcd57a7fa7eef872d90319207b14e54075f2bdc27573a46ff245d67e717a/diffusers-0.11.1.tar.gz", hash = "sha256:32684204134a0fd5f5a2cb7d71bbd2f9f8c79128c98e1af42dd8922f30a00109", size = 324032, upload-time = "2022-12-20T16:29:55.078Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5d/24/fa82fbb980df0c9be74306d929ed8f3cd858f8d0f440606bf688c28ebd8b/diffusers-0.11.1-py3-none-any.whl", hash = "sha256:5b3f0d113d369cb675d292c3dffb35d0bac96af095727b5380ca3d48eb0e3e94", size = 524888, upload-time = "2022-12-20T16:29:48.941Z" },
-]
-
-[[package]]
-name = "diffusion-policy-robomimic"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "av" },
-    { name = "click" },
-    { name = "cython" },
-    { name = "diffusers" },
-    { name = "dill" },
-    { name = "einops" },
-    { name = "filelock" },
-    { name = "free-mujoco-py" },
-    { name = "gym" },
-    { name = "h5py" },
-    { name = "huggingface-hub" },
-    { name = "hydra-core" },
-    { name = "imagecodecs" },
-    { name = "imageio" },
-    { name = "imageio-ffmpeg" },
-    { name = "matplotlib" },
-    { name = "numba" },
-    { name = "numcodecs" },
-    { name = "numpy" },
-    { name = "omegaconf" },
-    { name = "pandas" },
-    { name = "protobuf" },
-    { name = "robomimic" },
-    { name = "robosuite" },
-    { name = "scipy" },
-    { name = "setuptools" },
-    { name = "threadpoolctl" },
-    { name = "torch" },
-    { name = "torchvision" },
-    { name = "tqdm" },
-    { name = "wandb" },
-    { name = "zarr" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "av", specifier = "==12.3.0" },
-    { name = "click", specifier = "==8.0.4" },
-    { name = "cython", specifier = "==0.29.32" },
-    { name = "diffusers", specifier = "==0.11.1" },
-    { name = "dill", specifier = "==0.3.5.1" },
-    { name = "einops", specifier = "==0.4.1" },
-    { name = "filelock", specifier = "==3.19.1" },
-    { name = "free-mujoco-py", specifier = "==2.1.6" },
-    { name = "gym", path = "third_party/gym-0.21.0-py3-none-any.whl" },
-    { name = "h5py", specifier = "==3.7.0" },
-    { name = "huggingface-hub", specifier = "==0.11.1" },
-    { name = "hydra-core", specifier = "==1.2.0" },
-    { name = "imagecodecs", specifier = "==2022.9.26" },
-    { name = "imageio", specifier = "==2.22.0" },
-    { name = "imageio-ffmpeg", specifier = "==0.4.7" },
-    { name = "matplotlib", specifier = "==3.6.1" },
-    { name = "numba", specifier = "==0.53.1" },
-    { name = "numcodecs", specifier = "==0.10.2" },
-    { name = "numpy", specifier = "==1.23.3" },
-    { name = "omegaconf", specifier = "==2.2.3" },
-    { name = "pandas", specifier = "==2.2.3" },
-    { name = "protobuf", specifier = "==6.33.6" },
-    { name = "robomimic", specifier = "==0.2.0" },
-    { name = "robosuite", url = "https://github.com/cheng-chi/robosuite/archive/277ab9588ad7a4f4b55cf75508b44aa67ec171f0.tar.gz" },
-    { name = "scipy", specifier = "==1.9.1" },
-    { name = "setuptools", specifier = "==80.9.0" },
-    { name = "threadpoolctl", specifier = "==3.1.0" },
-    { name = "torch", specifier = "==2.1.2" },
-    { name = "torchvision", specifier = "==0.16.2" },
-    { name = "tqdm", specifier = "==4.64.1" },
-    { name = "wandb", specifier = "==0.26.1" },
-    { name = "zarr", specifier = "==2.12.0" },
 ]
 
 [[package]]

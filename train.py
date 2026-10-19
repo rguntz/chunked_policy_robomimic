@@ -1,7 +1,7 @@
 """
 Usage:
 Training:
-python train.py --config-name=train_diffusion_lowdim_workspace
+python train.py --config-name=train_diffusion_unet_lowdim_workspace task=square_lowdim_abs
 """
 
 import sys
@@ -12,7 +12,7 @@ sys.stderr = open(sys.stderr.fileno(), mode='w', buffering=1)
 import hydra
 from omegaconf import OmegaConf
 import pathlib
-from diffusion_policy.workspace.base_workspace import BaseWorkspace
+from chunked_policy.workspace.base_workspace import BaseWorkspace
 
 # allows arbitrary python code execution in configs using the ${eval:''} resolver
 OmegaConf.register_new_resolver("eval", eval, replace=True)
@@ -20,7 +20,7 @@ OmegaConf.register_new_resolver("eval", eval, replace=True)
 @hydra.main(
     version_base=None,
     config_path=str(pathlib.Path(__file__).parent.joinpath(
-        'diffusion_policy','config'))
+        'chunked_policy','config'))
 )
 def main(cfg: OmegaConf):
     # resolve immediately so all the ${now:} resolvers

@@ -1,7 +1,7 @@
 [project]
-name = "diffusion-policy-robomimic"
+name = "chunked-policy-robomimic"
 version = "0.1.0"
-description = "Minimal Diffusion Policy (UNet) on the robomimic tasks"
+description = "Action-chunking policies (BC MLP, diffusion UNet) on the robomimic tasks"
 requires-python = "==3.9.*"
 # versions pinned to the conda env this code was tested with
 dependencies = [

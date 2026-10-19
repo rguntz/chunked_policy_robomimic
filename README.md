@@ -1,8 +1,9 @@
-# Diffusion Policy — minimal robomimic version
+# Chunked Policy — robomimic
 
-A stripped-down version of [Diffusion Policy](https://github.com/real-stanford/diffusion_policy) (Chi et al., RSS 2023), restricted to the CNN-based (UNet) Diffusion Policy on the five [robomimic](https://robomimic.github.io/) tasks: **lift, can, square, tool_hang, transport**, from either state or image observations.
+Action-chunking policies trained by imitation on the five [robomimic](https://robomimic.github.io/) tasks: **lift, can, square, tool_hang, transport**, from either state or image observations. Two policies are available: a behavior cloning MLP and the CNN-based (UNet) diffusion policy, with a ResNet or a ViT vision encoder.
 
-Everything else from upstream (PushT, Kitchen, BlockPush, BET, IBC, the diffusion transformer, real-robot code, Ray multi-run scripts) has been removed. Changes to the remaining upstream code:
+The code is a stripped-down version of [Diffusion Policy](https://github.com/real-stanford/diffusion_policy) (Chi et al., RSS 2023). Everything else from upstream (PushT, Kitchen, BlockPush, BET, IBC, the diffusion transformer, real-robot code, Ray multi-run scripts) has been removed. Changes to the remaining upstream code:
+- the package is named `chunked_policy` (upstream: `diffusion_policy`), and the trainers shared by both policies `train_{lowdim,vision}_workspace`;
 - the image pipeline is named `vision` (upstream: `hybrid` / `image`), next to `lowdim` for state;
 - a ViT vision encoder is available as an alternative to the ResNet (`policy.vision_encoder=vit`);
 - a behavior cloning policy (MLP regressing the action chunk, MSE loss) is available as an alternative to the diffusion UNet;
@@ -59,7 +60,7 @@ The vision policies encode each camera separately and concatenate the features w
 train.py / eval.py                  entry points
 pyproject.toml / uv.lock            dependencies (uv)
 third_party/                        patched gym 0.21.0 wheel
-diffusion_policy/
+chunked_policy/
   config/                           hydra configs: 4 (policy x observation), 4 _single variants, 20 tasks
     task/<task>_{lowdim,vision}[_abs].yaml
   workspace/                        training loops
@@ -79,10 +80,10 @@ diffusion_policy/
 The configs use the robomimic proficient-human (`ph`) datasets as packaged by Diffusion Policy, in `data/robomimic/datasets/<task>/ph/{low_dim,image}[_abs].hdf5`. They are distributed in two zips (`robomimic_lowdim.zip`, 1.9 GB, and `robomimic_image.zip`, 85 GB, 274 GB unzipped, which also contain the unused `mh` datasets). The download script streams only the requested `ph` files out of the zips, without downloading the archives, and checks each file against the zip's CRC:
 
 ```console
-$ python diffusion_policy/scripts/download_robomimic.py --dry-run         # list the files and sizes
-$ python diffusion_policy/scripts/download_robomimic.py                   # all 5 tasks, lowdim + vision, _abs actions
-$ python diffusion_policy/scripts/download_robomimic.py --tasks lift can square --obs vision   # lift, can, square, vision only, _abs actions
-$ python diffusion_policy/scripts/download_robomimic.py --actions abs delta   # also the delta-action files (<task>_lowdim / <task>_vision configs)
+$ python chunked_policy/scripts/download_robomimic.py --dry-run         # list the files and sizes
+$ python chunked_policy/scripts/download_robomimic.py                   # all 5 tasks, lowdim + vision, _abs actions
+$ python chunked_policy/scripts/download_robomimic.py --tasks lift can square --obs vision   # lift, can, square, vision only, _abs actions
+$ python chunked_policy/scripts/download_robomimic.py --actions abs delta   # also the delta-action files (<task>_lowdim / <task>_vision configs)
 ```
 
 Sizes of the `_abs` files (the `delta` ones are the same size):
@@ -160,7 +161,7 @@ $ python eval.py -c data/outputs/.../checkpoints/latest.ckpt -o data/eval_output
 
 ## License and acknowledgement
 
-Released under the MIT license; see [LICENSE](LICENSE). Original code © 2023 Columbia Artificial Intelligence and Robotics Lab. `diffusion_policy/codecs/imagecodecs_numcodecs.py` is © Christoph Gohlke under the BSD-3-Clause license (see the file header). `diffusion_policy/model/common/rotation_conversions.py` is vendored from [PyTorch3D](https://github.com/facebookresearch/pytorch3d) (© Meta Platforms, BSD license, see `LICENSE_pytorch3d` next to it). `diffusion_policy/model/vision/min_vit.py` is taken from [IBRL](https://github.com/hengyuan-hu/ibrl) (see the file header).
+Released under the MIT license; see [LICENSE](LICENSE). Original code © 2023 Columbia Artificial Intelligence and Robotics Lab. `chunked_policy/codecs/imagecodecs_numcodecs.py` is © Christoph Gohlke under the BSD-3-Clause license (see the file header). `chunked_policy/model/common/rotation_conversions.py` is vendored from [PyTorch3D](https://github.com/facebookresearch/pytorch3d) (© Meta Platforms, BSD license, see `LICENSE_pytorch3d` next to it). `chunked_policy/model/vision/min_vit.py` is taken from [IBRL](https://github.com/hengyuan-hu/ibrl) (see the file header).
 
 From the upstream acknowledgements: the `ConditionalUnet1D` implementation is adapted from [Planning with Diffusion](https://github.com/jannerm/diffuser), and the [robomimic](https://github.com/ARISE-Initiative/robomimic) tasks and `ObservationEncoder` are used extensively.
 
