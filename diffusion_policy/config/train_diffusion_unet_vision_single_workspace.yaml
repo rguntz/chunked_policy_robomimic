@@ -1,0 +1,17 @@
+# Single action prediction (no action chunking): same as train_diffusion_unet_vision_workspace,
+# but the policy predicts one action from the current observation at every step.
+defaults:
+  - train_diffusion_unet_vision_workspace
+  - _self_
+
+name: train_diffusion_unet_vision_single
+
+horizon: 1
+n_obs_steps: 1
+n_action_steps: 1
+
+# the 1D UNet halves the time axis len(down_dims)-1 times, so horizon must be divisible
+# by 2^(len(down_dims)-1): a single level (no downsampling) is needed for horizon 1
+policy:
+  down_dims: [2048]
+

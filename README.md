@@ -60,7 +60,7 @@ train.py / eval.py                  entry points
 pyproject.toml / uv.lock            dependencies (uv)
 third_party/                        patched gym 0.21.0 wheel
 diffusion_policy/
-  config/                           hydra configs: 4 (policy x observation) + 20 tasks
+  config/                           hydra configs: 4 (policy x observation), 4 _single variants, 20 tasks
     task/<task>_{lowdim,vision}[_abs].yaml
   workspace/                        training loops
   policy/                           diffusion and BC policies
@@ -88,37 +88,60 @@ $ unzip robomimic_lowdim.zip && unzip robomimic_image.zip && cd ..
 
 Task configs come in four flavours per task: `<task>_lowdim`, `<task>_lowdim_abs`, `<task>_vision`, `<task>_vision_abs`. The `_abs` variants (absolute end-effector actions, rotation as 6D) are the ones used for the paper results.
 
+### Action chunking (paper setup)
+
+The policy predicts a chunk of `horizon` = 16 actions from the last `n_obs_steps` = 2 observations, and `n_action_steps` = 8 of them are executed before predicting again.
+
 ```console
-# state
+# diffusion, state
 $ python train.py --config-name=train_diffusion_unet_lowdim_workspace task=square_lowdim_abs \
     training.seed=42 training.device=cuda:0
 
-# vision, ResNet encoder (paper)
+# diffusion, vision, ResNet encoder (paper)
 $ python train.py --config-name=train_diffusion_unet_vision_workspace task=square_vision_abs \
     training.seed=42 training.device=cuda:0
 
-# vision, ViT encoder
+# diffusion, vision, ViT encoder
 $ python train.py --config-name=train_diffusion_unet_vision_workspace task=square_vision_abs \
     policy.vision_encoder=vit training.seed=42 training.device=cuda:0
 
-# BC (MLP) instead of diffusion: same commands with the bc_mlp configs
+# BC (MLP), state
 $ python train.py --config-name=train_bc_mlp_lowdim_workspace task=square_lowdim_abs \
     training.seed=42 training.device=cuda:0
+
+# BC (MLP), vision (add policy.vision_encoder=vit for the ViT encoder)
 $ python train.py --config-name=train_bc_mlp_vision_workspace task=square_vision_abs \
-    policy.vision_encoder=vit training.seed=42 training.device=cuda:0
+    training.seed=42 training.device=cuda:0
 ```
+
+### Single action prediction
+
+The `_single` configs inherit from the configs above and only set `horizon` = `n_obs_steps` = `n_action_steps` = 1: the policy predicts one action from the current observation at every step. For diffusion, the UNet also uses a single level (no temporal downsampling), since its `horizon` must be divisible by 2^(len(`down_dims`)-1). Single-step diffusion is not the paper's architecture.
+
+```console
+# diffusion, state
+$ python train.py --config-name=train_diffusion_unet_lowdim_single_workspace task=square_lowdim_abs \
+    training.seed=42 training.device=cuda:0
+
+# diffusion, vision (add policy.vision_encoder=vit for the ViT encoder)
+$ python train.py --config-name=train_diffusion_unet_vision_single_workspace task=square_vision_abs \
+    training.seed=42 training.device=cuda:0
+
+# BC (MLP), state
+$ python train.py --config-name=train_bc_mlp_lowdim_single_workspace task=square_lowdim_abs \
+    training.seed=42 training.device=cuda:0
+
+# BC (MLP), vision (add policy.vision_encoder=vit for the ViT encoder)
+$ python train.py --config-name=train_bc_mlp_vision_single_workspace task=square_vision_abs \
+    training.seed=42 training.device=cuda:0
+```
+
+The policy is called at every environment step (400 calls per episode instead of 50), so evaluation rollouts are slower, especially for diffusion (100 denoising steps per call).
 
 Each checkpoint of a diffusion vision run is about 4.4 GB (UNet + EMA copy + optimizer state), so keep an eye on disk space; `checkpoint.topk.k` sets how many are kept. BC checkpoints are much smaller (about 0.5 GB with the ResNet, 60 MB with the ViT, 20 MB for state).
 
 Logging goes to [wandb](https://wandb.ai) (`wandb login` first, or add `logging.mode=offline`). Outputs (config, logs, checkpoints, rollout videos) are written to `data/outputs/<date>/<time>_<name>_<task>/`.
 
-Quick end-to-end smoke test (a few steps of training, validation, a short rollout and checkpointing):
-
-```console
-$ python train.py --config-name=train_diffusion_unet_vision_workspace task=square_vision_abs \
-    training.debug=True logging.mode=disabled \
-    task.env_runner.n_train=1 task.env_runner.n_test=2 task.env_runner.n_envs=null task.env_runner.max_steps=20
-```
 
 Evaluation runs 50 test rollouts on 28 parallel environments by default (about 1 GB of RAM per image environment).
 

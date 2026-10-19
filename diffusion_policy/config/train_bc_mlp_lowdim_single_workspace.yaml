@@ -1,0 +1,12 @@
+# Single action prediction (no action chunking): same as train_bc_mlp_lowdim_workspace,
+# but the policy predicts one action from the current observation at every step.
+defaults:
+  - train_bc_mlp_lowdim_workspace
+  - _self_
+
+name: train_bc_mlp_lowdim_single
+
+horizon: 1
+n_obs_steps: 1
+n_action_steps: 1
+
