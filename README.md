@@ -14,8 +14,8 @@ Everything else from upstream (PushT, Kitchen, BlockPush, BET, IBC, the diffusio
 Clone the repository:
 
 ```console
-$ git clone https://github.com/rguntz/diffusion_policy_robomimic.git
-$ cd diffusion_policy_robomimic
+$ git clone https://github.com/rguntz/chunked_policy_robomimic
+$ cd chunked_policy_robomimic
 ```
 
 robosuite 1.2 simulates with `mujoco-py`, which needs the MuJoCo 2.1 binaries and a few system libraries (one-time setup):
@@ -70,19 +70,29 @@ diffusion_policy/
   env/robomimic/, env_runner/,
   gym_util/                         rollout / evaluation in robosuite
   common/, codecs/                  replay buffer, sampler, checkpointing, video recorder, image codecs
+  scripts/download_robomimic.py             download the ph datasets
   scripts/robomimic_dataset_conversion.py   delta -> absolute action conversion
 ```
 
 ## Data
 
-Download the robomimic datasets as packaged by Diffusion Policy into `data/` (the configs expect `data/robomimic/datasets/<task>/ph/{low_dim,image}[_abs].hdf5`):
+The configs use the robomimic proficient-human (`ph`) datasets as packaged by Diffusion Policy, in `data/robomimic/datasets/<task>/ph/{low_dim,image}[_abs].hdf5`. They are distributed in two zips (`robomimic_lowdim.zip`, 1.9 GB, and `robomimic_image.zip`, 85 GB, 274 GB unzipped, which also contain the unused `mh` datasets). The download script streams only the requested `ph` files out of the zips, without downloading the archives, and checks each file against the zip's CRC:
 
 ```console
-$ mkdir -p data && cd data
-$ wget https://diffusion-policy.cs.columbia.edu/data/training/robomimic_lowdim.zip   # ~1.9 GB
-$ wget https://diffusion-policy.cs.columbia.edu/data/training/robomimic_image.zip    # ~85 GB
-$ unzip robomimic_lowdim.zip && unzip robomimic_image.zip && cd ..
+$ python diffusion_policy/scripts/download_robomimic.py --dry-run         # list the files and sizes
+$ python diffusion_policy/scripts/download_robomimic.py                   # all 5 tasks, lowdim + vision, _abs actions
+$ python diffusion_policy/scripts/download_robomimic.py --tasks lift can square --obs vision
+$ python diffusion_policy/scripts/download_robomimic.py --actions abs delta   # also the delta-action files (<task>_lowdim / <task>_vision configs)
 ```
+
+Sizes of the `_abs` files (the `delta` ones are the same size):
+
+| | lift | can | square | tool_hang | transport |
+|---|---|---|---|---|---|
+| lowdim | 0.02 GB | 0.05 GB | 0.05 GB | 0.20 GB | 0.31 GB |
+| vision | 0.84 GB | 2.01 GB | 2.60 GB | 66.5 GB | 16.2 GB |
+
+Files already present with the right size are skipped. The script stops before downloading if the disk does not have enough free space.
 
 ## Training
 
@@ -136,9 +146,6 @@ $ python train.py --config-name=train_bc_mlp_vision_single_workspace task=square
     training.seed=42 training.device=cuda:0
 ```
 
-The policy is called at every environment step (400 calls per episode instead of 50), so evaluation rollouts are slower, especially for diffusion (100 denoising steps per call).
-
-Each checkpoint of a diffusion vision run is about 4.4 GB (UNet + EMA copy + optimizer state), so keep an eye on disk space; `checkpoint.topk.k` sets how many are kept. BC checkpoints are much smaller (about 0.5 GB with the ResNet, 60 MB with the ViT, 20 MB for state).
 
 Logging goes to [wandb](https://wandb.ai) (`wandb login` first, or add `logging.mode=offline`). Outputs (config, logs, checkpoints, rollout videos) are written to `data/outputs/<date>/<time>_<name>_<task>/`.
 
