@@ -4,7 +4,7 @@
 # one run per task. Missing ph datasets are downloaded before each task.
 #
 # Usage (from the repo root or anywhere):
-#   bash chunked_policy/scripts/train_diffusion_vision_all_tasks.sh              # all 5 tasks
+#   bash chunked_policy/scripts/train_diffusion_vision_all_tasks.sh              # can, square, tool_hang, transport (lift is done)
 #   bash chunked_policy/scripts/train_diffusion_vision_all_tasks.sh lift can     # a subset
 #   EXTRA="training.debug=True logging.mode=disabled" bash chunked_policy/scripts/train_diffusion_vision_all_tasks.sh lift   # quick test
 #
@@ -30,7 +30,8 @@ SEED=42
 PROJECT=chunked_policy_robomimic_diffusion_vision
 declare -A EPOCHS=([lift]=801 [can]=301 [square]=601 [tool_hang]=201 [transport]=201)
 
-if [ $# -gt 0 ]; then TASKS=("$@"); else TASKS=(lift can square tool_hang transport); fi
+# lift is already trained, so it is left out of the default list (pass it explicitly to rerun it)
+if [ $# -gt 0 ]; then TASKS=("$@"); else TASKS=(can square tool_hang transport); fi
 for task in "${TASKS[@]}"; do
     [ -n "${EPOCHS[$task]:-}" ] || { echo "unknown task: $task (lift can square tool_hang transport)"; exit 1; }
 done

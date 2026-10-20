@@ -153,6 +153,15 @@ Logging goes to [wandb](https://wandb.ai) (`wandb login` first, or add `logging.
 
 Evaluation runs 50 test rollouts on 28 parallel environments by default (about 1 GB of RAM per image environment).
 
+## Pretrained checkpoints
+
+Vision diffusion policy checkpoints (paper setup, ph datasets, `_abs` actions, seed 42) are on Hugging Face at [rguntz/chunked_policy_robomimic](https://huggingface.co/rguntz/chunked_policy_robomimic), under `diffusion_unet_vision/<task>_ph_seed42/`. Each task folder has the 2 best checkpoints and `latest.ckpt` (~4.6 GB each, with model, EMA and optimizer weights), plus the config and training logs. To download one (the venv's `huggingface_hub` is too old for `hf download`, so it goes through `uvx`):
+
+```console
+$ uvx --from huggingface_hub hf download rguntz/chunked_policy_robomimic \
+    --include "diffusion_unet_vision/square_ph_seed42/checkpoints/latest.ckpt" --local-dir data/checkpoints
+```
+
 ## Evaluation of a checkpoint
 
 ```console
