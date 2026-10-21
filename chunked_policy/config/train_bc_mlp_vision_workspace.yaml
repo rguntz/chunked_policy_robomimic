@@ -30,14 +30,14 @@ policy:
   eval_fixed_crop: True
   # resnet: robomimic ResNet18 + spatial softmax (paper), vit: MinVit from IBRL
   vision_encoder: resnet
-  # only used when vision_encoder=vit (defaults of IBRL's VitEncoderConfig)
+  # only used when vision_encoder=vit (IBRL robomimic config: release/cfgs/robomimic_rl/{can,square}_ibrl.yaml)
   vit:
     feature_dim: 64
-    embed_style: embed1
+    embed_style: embed2
     embed_dim: 128
     embed_norm: 0
     num_head: 4
-    depth: 3
+    depth: 1
   # MLP from the stacked obs features to the action chunk (horizon x action_dim)
   hidden_dims: [1024, 1024]
   dropout: 0.0
